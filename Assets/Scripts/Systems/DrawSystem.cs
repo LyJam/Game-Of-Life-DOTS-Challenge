@@ -28,7 +28,7 @@ public partial struct DrawSystem : ISystem
     }
 }
 
-
+[BurstCompile]
 public partial struct SetColors : IJobEntity
 {
     [NativeDisableParallelForRestriction]
