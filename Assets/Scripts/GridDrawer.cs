@@ -5,8 +5,8 @@ using UnityEngine.Rendering;
 
 public class GridDrawer : MonoBehaviour
 {
-    private int gridSize;
     private Texture2D gridTexture;
+    public static int gridSize = 100;
 
     public static GridDrawer Instance { private set; get; }
 
@@ -18,8 +18,6 @@ public class GridDrawer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gridSize = GridAuthoring.gridSize;
-
         transform.position = new Vector3(gridSize/2, gridSize/2, 0);
         transform.localScale = new Vector3(gridSize, gridSize, 1);
         Camera.main.transform.position = new Vector3(gridSize / 2, gridSize / 2, -10);
