@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [UpdateBefore(typeof(RunSimulationSystem))]
 public partial struct InitializeSystem : ISystem
@@ -45,6 +47,43 @@ public partial struct InitializeSystem : ISystem
         }
         ecb.Playback(state.EntityManager);
 
+        NativeArray<Entity> gridEntities = new NativeArray<Entity>(gridSize * gridSize, Allocator.Persistent);
+        foreach((CellPositionComponent pos, Entity e) in SystemAPI.Query<CellPositionComponent>().WithEntityAccess())
+        {
+            int index = pos.position.x + pos.position.y * gridSize; // Convert 2D position to 1D index
+            if (index >= 0 && index < gridSize * gridSize)
+            {
+                gridEntities[index] = e; // Store the entity reference
+            }
+        }
+
+        foreach ((CellPositionComponent pos, Entity entity) in SystemAPI.Query<CellPositionComponent>().WithEntityAccess())
+        {
+            int x = pos.position.x;
+            int y = pos.position.y;
+            CellNeighborsComponent cellData = state.EntityManager.GetComponentData<CellNeighborsComponent>(entity);
+            // Top
+            if (y + 1 < gridSize) cellData.top = gridEntities[x + (y + 1) * gridSize];
+            // Bottom
+            if (y - 1 >= 0) cellData.bottom = gridEntities[x + (y - 1) * gridSize];
+            // Left
+            if (x - 1 >= 0) cellData.left = gridEntities[(x - 1) + y * gridSize];
+            // Right
+            if (x + 1 < gridSize) cellData.right = gridEntities[(x + 1) + y * gridSize];
+            // Top-Left
+            if (x - 1 >= 0 && y + 1 < gridSize) cellData.topleft = gridEntities[(x - 1) + (y + 1) * gridSize];
+            // Top-Right
+            if (x + 1 < gridSize && y + 1 < gridSize) cellData.topright = gridEntities[(x + 1) + (y + 1) * gridSize];
+            // Bottom-Left
+            if (x - 1 >= 0 && y - 1 >= 0) cellData.bottomleft = gridEntities[(x - 1) + (y - 1) * gridSize];
+            // Bottom-Right
+            if (x + 1 < gridSize && y - 1 >= 0) cellData.bottomRight = gridEntities[(x + 1) + (y - 1) * gridSize];
+            state.EntityManager.SetComponentData(entity, cellData);
+        }
+
+        gridEntities.Dispose();
+
+        /*
         foreach ((CellPositionComponent pos, Entity entity) in SystemAPI.Query<CellPositionComponent>().WithEntityAccess())
         {
             int x = pos.position.x;
@@ -114,5 +153,6 @@ public partial struct InitializeSystem : ISystem
                     }
             }
         }
+        */
     }
 }

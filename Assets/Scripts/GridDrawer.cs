@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 public class GridDrawer : MonoBehaviour
 {
     private Texture2D gridTexture;
-    public static int gridSize = 100;
+    public static int gridSize = 1000;
 
     public static GridDrawer Instance { private set; get; }
 
