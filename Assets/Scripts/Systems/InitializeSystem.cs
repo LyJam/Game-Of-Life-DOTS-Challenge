@@ -25,23 +25,25 @@ public partial struct InitializeSystem : ISystem
 
     public void InitCells(SystemState state)
     {
+        EntityCommandBuffer ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
         for (int i = 0; i < gridSize; i++)
         {
             for (int j = 0; j < gridSize; j++)
             {
-                Entity newCell = state.EntityManager.CreateEntity();
-                state.EntityManager.AddComponentData(newCell, new CellPositionComponent
+                Entity newCell = ecb.CreateEntity();
+                ecb.AddComponent(newCell, new CellPositionComponent
                 {
                     position = new int2(i, j)
                 });
-                state.EntityManager.AddComponentData(newCell, new CellAliveComponent
+                ecb.AddComponent(newCell, new CellAliveComponent
                 {
                     alive = false,
                     aliveNextGeneration = false
                 });
-                state.EntityManager.AddComponent(newCell, typeof(CellNeighborsComponent));
+                ecb.AddComponent(newCell, typeof(CellNeighborsComponent));
             }
         }
+        ecb.Playback(state.EntityManager);
 
         foreach ((CellPositionComponent pos, Entity entity) in SystemAPI.Query<CellPositionComponent>().WithEntityAccess())
         {
