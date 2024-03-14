@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 public class GridDrawer : MonoBehaviour
 {
     private Texture2D gridTexture;
-    public static int gridSize = 1000;
+    public static int gridSize = 100;
 
     public static GridDrawer Instance { private set; get; }
 
@@ -44,5 +44,14 @@ public class GridDrawer : MonoBehaviour
         Sprite sprite = Sprite.Create(gridTexture, new Rect(0.0f, 0.0f, gridTexture.width, gridTexture.height), new Vector2(0.5f, 0.5f));
         GetComponent<SpriteRenderer>().sprite = sprite;
     }
-
+    public void SetPixel(Color[] color)
+    {
+        if(color.Length == gridSize * gridSize)
+        {
+            gridTexture.SetPixels(color);
+            gridTexture.Apply();
+            Sprite sprite = Sprite.Create(gridTexture, new Rect(0.0f, 0.0f, gridTexture.width, gridTexture.height), new Vector2(0.5f, 0.5f));
+            GetComponent<SpriteRenderer>().sprite = sprite;
+        }
+    }
 }

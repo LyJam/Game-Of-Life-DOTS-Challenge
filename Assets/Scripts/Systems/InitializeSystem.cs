@@ -39,7 +39,7 @@ public partial struct InitializeSystem : ISystem
                 });
                 ecb.AddComponent(newCell, new CellAliveComponent
                 {
-                    alive = false,
+                    alive = (UnityEngine.Random.value < 0.5f),
                     aliveNextGeneration = false
                 });
                 ecb.AddComponent(newCell, typeof(CellNeighborsComponent));
