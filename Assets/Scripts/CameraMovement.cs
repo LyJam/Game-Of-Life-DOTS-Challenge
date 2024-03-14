@@ -21,7 +21,7 @@ public class CameraMovement : MonoBehaviour
     {
         // Zoom in and out with the scroll wheel
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        cam.orthographicSize -= scroll * zoomSpeed * 1000 * Time.deltaTime * cam.orthographicSize;
+        cam.orthographicSize -= scroll * zoomSpeed * 1000 * cam.orthographicSize;
         cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minSize, maxSize);
 
         // Initiate camera movement
