@@ -32,6 +32,8 @@ public partial struct RunSimulationSystem : ISystem
         JobHandle calclulateNextGenerationJobHandle = calclulateNextGeneration.ScheduleParallel(state.Dependency);
         calclulateNextGenerationJobHandle.Complete();
 
+        aliveArray.Dispose();
+
         sw.Stop();
         PerformanceData.Instance.setSimulationTime(sw.ElapsedMilliseconds);
     }
