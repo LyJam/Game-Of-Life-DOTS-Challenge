@@ -16,18 +16,35 @@ public partial struct InitializeSystem : ISystem
 
     void OnCreate(ref SystemState state)
     {
-        gridSize = GridDrawer.gridSize;
+        gridSize = 100;
 
-        InitCells(state);
+        EntityCommandBuffer buffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+        InitCells(state, buffer);
+        buffer.Playback(state.EntityManager);
     }
     void OnUpdate(ref SystemState state)
     {
-
+        EntityCommandBuffer buffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+        foreach ((ButtonPressed reset, Entity e) in SystemAPI.Query<ButtonPressed>().WithEntityAccess())
+        {
+            RemoveCells(state, buffer);
+            gridSize = GridDrawer.Instance.gridSize;
+            buffer.DestroyEntity(e);
+            InitCells(state, buffer);
+        }
+        buffer.Playback(state.EntityManager);
     }
 
-    public void InitCells(SystemState state)
+    public void RemoveCells(SystemState state, EntityCommandBuffer ecb)
     {
-        EntityCommandBuffer ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+        foreach((CellAliveComponent alive, Entity e) in SystemAPI.Query<CellAliveComponent>().WithEntityAccess())
+        {
+            ecb.DestroyEntity(e);
+        }
+    }
+
+    public void InitCells(SystemState state, EntityCommandBuffer ecb)
+    {
         for (int i = 0; i < gridSize; i++)
         {
             for (int j = 0; j < gridSize; j++)
@@ -43,6 +60,5 @@ public partial struct InitializeSystem : ISystem
                 });
             }
         }
-        ecb.Playback(state.EntityManager);
     }
 }

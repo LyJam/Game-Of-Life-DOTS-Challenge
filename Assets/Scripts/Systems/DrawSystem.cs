@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,10 +14,14 @@ public partial struct DrawSystem : ISystem
     int gridSize;
     void OnCreate(ref SystemState state)
     {
-        gridSize = GridDrawer.gridSize;
+        gridSize = 100;
     }
     void OnUpdate(ref SystemState state)
     {
+        Stopwatch sw = Stopwatch.StartNew();
+
+        gridSize = GridDrawer.Instance.gridSize;
+
         NativeArray<Color> colors = new NativeArray<Color>(gridSize * gridSize, Allocator.TempJob);
         SetColors setColors = new SetColors { colors = colors, gridSize = gridSize };
         JobHandle handle = setColors.ScheduleParallel(state.Dependency);
@@ -25,6 +30,9 @@ public partial struct DrawSystem : ISystem
         GridDrawer.Instance.SetPixel(colors.ToArray());
 
         colors.Dispose();
+
+        sw.Stop();
+        PerformanceData.Instance.setDrawTime(sw.ElapsedMilliseconds);
     }
 }
 

@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -13,10 +14,14 @@ public partial struct RunSimulationSystem : ISystem
     int gridSize;
     void OnCreate(ref SystemState state)
     {
-        gridSize = GridDrawer.gridSize;
+        gridSize = 100;
     }
     void OnUpdate(ref SystemState state)
     {
+        Stopwatch sw = Stopwatch.StartNew();
+
+        gridSize = GridDrawer.Instance.gridSize;
+
         NativeArray<bool> aliveArray = new NativeArray<bool>(gridSize * gridSize, Allocator.TempJob);
        
         SetAliveArray setAliveArray = new SetAliveArray { gridSize = gridSize, aliveArray = aliveArray };
@@ -26,6 +31,9 @@ public partial struct RunSimulationSystem : ISystem
         CalclulateNextGeneration calclulateNextGeneration = new CalclulateNextGeneration() { gridSize = gridSize, aliveArray = aliveArray };
         JobHandle calclulateNextGenerationJobHandle = calclulateNextGeneration.ScheduleParallel(state.Dependency);
         calclulateNextGenerationJobHandle.Complete();
+
+        sw.Stop();
+        PerformanceData.Instance.setSimulationTime(sw.ElapsedMilliseconds);
     }
 }
 
