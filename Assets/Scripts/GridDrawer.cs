@@ -32,7 +32,7 @@ public class GridDrawer : MonoBehaviour
 
         Texture2D backgroundTexture = new Texture2D(gridSize, gridSize);
         backgroundTexture.Apply();
-        Sprite backgroundSprite = Sprite.Create(backgroundTexture, new Rect(0.0f, 0.0f, gridTexture.width, gridTexture.height), new Vector2(0.5f, 0.5f));
+        Sprite backgroundSprite = Sprite.Create(backgroundTexture, new Rect(0.0f, 0.0f, backgroundTexture.width, backgroundTexture.height), new Vector2(0.5f, 0.5f));
         background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 
@@ -46,16 +46,13 @@ public class GridDrawer : MonoBehaviour
 
         Texture2D backgroundTexture = new Texture2D(gridSize, gridSize);
         backgroundTexture.Apply();
-        Sprite backgroundSprite = Sprite.Create(backgroundTexture, new Rect(0.0f, 0.0f, gridTexture.width, gridTexture.height), new Vector2(0.5f, 0.5f));
+        Sprite backgroundSprite = Sprite.Create(backgroundTexture, new Rect(0.0f, 0.0f, backgroundTexture.width, backgroundTexture.height), new Vector2(0.5f, 0.5f));
         background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 
     public void SetPixels(NativeArray<byte> color)
     {
-        if(color.Length == gridSize * gridSize)
-        {
-            gridTexture.LoadRawTextureData<byte>(color);
-            gridTexture.Apply();
-        }
+        gridTexture.LoadRawTextureData<byte>(color);
+        gridTexture.Apply();
     }
 }
