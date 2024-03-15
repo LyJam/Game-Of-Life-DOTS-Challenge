@@ -21,8 +21,7 @@ public partial struct RunSimulationSystem : ISystem
         gridSize = GridDrawer.Instance.gridSize;
 
         NativeArray<bool> aliveArray = new NativeArray<bool>(gridSize * gridSize, Allocator.TempJob);
-       
-        SetAliveArray setAliveArray = new SetAliveArray { gridSize = gridSize, aliveArray = aliveArray };
+        SetAliveArray setAliveArray = new SetAliveArray {aliveArray = aliveArray };
         JobHandle setAliveArrayJobHandle = setAliveArray.ScheduleParallel(state.Dependency);
         setAliveArrayJobHandle.Complete();
 
@@ -39,16 +38,15 @@ public partial struct SetAliveArray : IJobEntity
 {
     [NativeDisableParallelForRestriction]
     public NativeArray<bool> aliveArray;
-    public int gridSize;
     public void Execute(in CellAliveComponent cell, in CellPositionComponent pos)
     {
         if (cell.alive)
         {
-            aliveArray[pos.position.x + pos.position.y * gridSize] = true;
+            aliveArray[pos.position] = true;
         }
         else
         {
-            aliveArray[pos.position.x + pos.position.y * gridSize] = false;
+            aliveArray[pos.position] = false;
         }
     }
 }
@@ -62,24 +60,22 @@ public partial struct CalclulateNextGeneration : IJobEntity
     public void Execute(ref CellAliveComponent cell, in CellPositionComponent pos)
     {
         int neighbors = 0;
-        int x = pos.position.x;
-        int y = pos.position.y;
         // Top
-        if (y + 1 < gridSize) if(aliveArray[x + (y + 1) * gridSize]) neighbors++;
+        if ((pos.position + gridSize) < gridSize * gridSize) if(aliveArray[pos.position + gridSize]) neighbors++;
         // Bottom
-        if (y - 1 >= 0) if(aliveArray[x + (y - 1) * gridSize]) neighbors++;
+        if ((pos.position - gridSize) >= 0) if(aliveArray[pos.position - gridSize]) neighbors++;
         // Left
-        if (x - 1 >= 0) if (aliveArray[(x - 1) + y * gridSize]) neighbors++;
+        if ((pos.position - 1) >= 0) if (aliveArray[pos.position - 1]) neighbors++;
         // Right
-        if (x + 1 < gridSize) if (aliveArray[(x + 1) + y * gridSize]) neighbors++;
+        if ((pos.position + 1) < gridSize * gridSize) if (aliveArray[pos.position + 1]) neighbors++;
         // Top-Left
-        if (x - 1 >= 0 && y + 1 < gridSize) if (aliveArray[(x - 1) + (y + 1) * gridSize]) neighbors++;
+        if ((pos.position + gridSize - 1) >= 0 && (pos.position + gridSize - 1) < gridSize * gridSize) if (aliveArray[pos.position + gridSize - 1]) neighbors++;
         // Top-Right
-        if (x + 1 < gridSize && y + 1 < gridSize) if (aliveArray[(x + 1) + (y + 1) * gridSize]) neighbors++;
+        if ((pos.position + gridSize + 1) < gridSize * gridSize) if (aliveArray[pos.position + gridSize + 1]) neighbors++;
         // Bottom-Left
-        if (x - 1 >= 0 && y - 1 >= 0) if (aliveArray[(x - 1) + (y - 1) * gridSize]) neighbors++;
+        if ((pos.position - gridSize - 1) >= 0) if (aliveArray[pos.position - gridSize - 1]) neighbors++;
         // Bottom-Right
-        if (x + 1 < gridSize && y - 1 >= 0) if (aliveArray[(x + 1) + (y - 1) * gridSize]) neighbors++;
+        if ((pos.position - gridSize + 1) >= 0 && (pos.position - gridSize + 1) < gridSize * gridSize) if (aliveArray[pos.position - gridSize + 1]) neighbors++;
 
         if (neighbors <= 1) cell.alive = false;
         if (neighbors >= 4) cell.alive = false;

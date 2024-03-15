@@ -55,9 +55,7 @@ public class GridDrawer : MonoBehaviour
         if(color.Length == gridSize * gridSize)
         {
             gridTexture.LoadRawTextureData<byte>(color);
-            //gridTexture.SetPixels(color);
             gridTexture.Apply();
-            GetComponent<Renderer>().material.mainTexture = gridTexture;
         }
     }
 }

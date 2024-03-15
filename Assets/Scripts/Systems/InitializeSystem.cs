@@ -45,20 +45,17 @@ public partial struct InitializeSystem : ISystem
 
     public void InitCells(SystemState state, EntityCommandBuffer ecb)
     {
-        for (int i = 0; i < gridSize; i++)
+        for (int i = 0; i < (gridSize * gridSize); i++)
         {
-            for (int j = 0; j < gridSize; j++)
+            Entity newCell = ecb.CreateEntity();
+            ecb.AddComponent(newCell, new CellPositionComponent
             {
-                Entity newCell = ecb.CreateEntity();
-                ecb.AddComponent(newCell, new CellPositionComponent
-                {
-                    position = new int2(i, j)
-                });
-                ecb.AddComponent(newCell, new CellAliveComponent
-                {
-                    alive = (UnityEngine.Random.value < 0.5f),
-                });
-            }
+                position = i
+            });
+            ecb.AddComponent(newCell, new CellAliveComponent
+            {
+                alive = (UnityEngine.Random.value < 0.5f),
+            });
         }
     }
 }
