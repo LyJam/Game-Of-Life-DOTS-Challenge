@@ -19,13 +19,13 @@ public partial struct DrawSystem : ISystem
     {
         gridSize = GridDrawer.Instance.gridSize;
 
-        NativeArray<Color> colors = new NativeArray<Color>(gridSize * gridSize, Allocator.TempJob);
+        NativeArray<byte> colors = new NativeArray<byte>(gridSize * gridSize, Allocator.TempJob);
         SetColors setColors = new SetColors { colors = colors, gridSize = gridSize };
         JobHandle handle = setColors.ScheduleParallel(state.Dependency);
         handle.Complete();
 
-        GridDrawer.Instance.SetPixel(colors.ToArray());
-
+        GridDrawer.Instance.SetPixels(colors);
+        
         colors.Dispose();
     }
 }
@@ -34,17 +34,17 @@ public partial struct DrawSystem : ISystem
 public partial struct SetColors : IJobEntity
 {
     [NativeDisableParallelForRestriction]
-    public NativeArray<Color> colors;
+    public NativeArray<byte> colors;
     public int gridSize;
     public void Execute(in CellAliveComponent cell, in CellPositionComponent pos)
     {
         if(cell.alive)
         {
-            colors[pos.position.x + pos.position.y * gridSize] = Color.white;
+            colors[pos.position.x + pos.position.y * gridSize] = 0x00;
         }
         else
         {
-            colors[pos.position.x + pos.position.y * gridSize] = Color.black;
+            colors[pos.position.x + pos.position.y * gridSize] = 0xFF;
         }
     }
 }
