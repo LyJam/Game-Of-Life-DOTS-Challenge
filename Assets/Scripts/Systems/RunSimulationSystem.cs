@@ -18,8 +18,6 @@ public partial struct RunSimulationSystem : ISystem
     }
     void OnUpdate(ref SystemState state)
     {
-        Stopwatch sw = Stopwatch.StartNew();
-
         gridSize = GridDrawer.Instance.gridSize;
 
         NativeArray<bool> aliveArray = new NativeArray<bool>(gridSize * gridSize, Allocator.TempJob);
@@ -33,9 +31,6 @@ public partial struct RunSimulationSystem : ISystem
         calclulateNextGenerationJobHandle.Complete();
 
         aliveArray.Dispose();
-
-        sw.Stop();
-        PerformanceData.Instance.setSimulationTime(sw.ElapsedMilliseconds);
     }
 }
 

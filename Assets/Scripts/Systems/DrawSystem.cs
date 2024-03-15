@@ -6,7 +6,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Transforms;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public partial struct DrawSystem : ISystem
@@ -18,8 +17,6 @@ public partial struct DrawSystem : ISystem
     }
     void OnUpdate(ref SystemState state)
     {
-        Stopwatch sw = Stopwatch.StartNew();
-
         gridSize = GridDrawer.Instance.gridSize;
 
         NativeArray<Color> colors = new NativeArray<Color>(gridSize * gridSize, Allocator.TempJob);
@@ -30,9 +27,6 @@ public partial struct DrawSystem : ISystem
         GridDrawer.Instance.SetPixel(colors.ToArray());
 
         colors.Dispose();
-
-        sw.Stop();
-        PerformanceData.Instance.setDrawTime(sw.ElapsedMilliseconds);
     }
 }
 
