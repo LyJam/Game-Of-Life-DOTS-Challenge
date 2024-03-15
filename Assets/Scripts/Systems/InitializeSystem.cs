@@ -29,7 +29,6 @@ public partial struct InitializeSystem : ISystem
         {
             RemoveCells(state, buffer);
             gridSize = GridDrawer.Instance.gridSize;
-            buffer.DestroyEntity(e);
             InitCells(state, buffer);
         }
         buffer.Playback(state.EntityManager);
