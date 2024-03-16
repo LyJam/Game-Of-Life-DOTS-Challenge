@@ -22,7 +22,6 @@ public partial struct RunSimulationSystem : ISystem
         CreateAliveArray();
     }
 
-    [BurstCompile]
     void OnUpdate(ref SystemState state)
     {
         EntityCommandBuffer buffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
