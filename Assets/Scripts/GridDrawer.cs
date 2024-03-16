@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -50,9 +51,9 @@ public class GridDrawer : MonoBehaviour
         background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 
-    public void SetPixels(NativeArray<byte> color)
+    public void ApplyTexture(NativeArray<byte> texture)
     {
-        gridTexture.LoadRawTextureData<byte>(color);
+        gridTexture.LoadRawTextureData<byte>(texture);
         gridTexture.Apply();
     }
 }

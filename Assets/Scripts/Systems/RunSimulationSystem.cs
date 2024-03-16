@@ -14,49 +14,47 @@ using UnityEngine;
 public partial struct RunSimulationSystem : ISystem
 {
     int gridSize;
-    NativeArray<byte> aliveArrayPrefab;
+    NativeArray<byte> aliveArray;
     void OnCreate(ref SystemState state)
     {
         gridSize = 100;
-        aliveArrayPrefab = new NativeArray<byte>(gridSize * gridSize, Allocator.TempJob);
-        SetAliveArrayPrefab();
+        aliveArray = new NativeArray<byte>(gridSize * gridSize, Allocator.TempJob);
+        CreateAliveArray();
     }
+
+    [BurstCompile]
     void OnUpdate(ref SystemState state)
     {
         EntityCommandBuffer buffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
         foreach ((ButtonPressed reset, Entity e) in SystemAPI.Query<ButtonPressed>().WithEntityAccess())
         {
             gridSize = GridDrawer.Instance.gridSize;
-            SetAliveArrayPrefab();
+            CreateAliveArray();
             buffer.DestroyEntity(e);
         }
         buffer.Playback(state.EntityManager);
-
-        NativeArray<byte> aliveArray = new NativeArray<byte>((gridSize + 2) * (gridSize + 2), Allocator.TempJob);
-        NativeArray<byte>.Copy(aliveArrayPrefab, aliveArray);
 
         SetAliveArray setAliveArray = new SetAliveArray {aliveArray = aliveArray , gridSize = gridSize};
         JobHandle setAliveArrayJobHandle = setAliveArray.ScheduleParallel(state.Dependency);
         setAliveArrayJobHandle.Complete();
 
-        GridDrawer.Instance.SetPixels(aliveArray);
-
         CalclulateNextGeneration calclulateNextGeneration = new CalclulateNextGeneration() { gridSize = gridSize, aliveArray = aliveArray };
         JobHandle calclulateNextGenerationJobHandle = calclulateNextGeneration.ScheduleParallel(state.Dependency);
-        calclulateNextGenerationJobHandle.Complete();
 
-        aliveArray.Dispose();
+        GridDrawer.Instance.ApplyTexture(aliveArray);
+        
+        calclulateNextGenerationJobHandle.Complete();
     }
 
-    private void SetAliveArrayPrefab()
+    private void CreateAliveArray()
     {
-        aliveArrayPrefab.Dispose();
+        aliveArray.Dispose();
 
         //the '+ 2' will create a border around the actual grid. this is usefull because then we don't have to check if we are out of bounds of the array in the CalclulateNextGeneration job
-        aliveArrayPrefab = new NativeArray<byte>((gridSize + 2) * (gridSize + 2), Allocator.TempJob);
+        aliveArray = new NativeArray<byte>((gridSize + 2) * (gridSize + 2), Allocator.TempJob);
         for (int i = 0; i < (gridSize + 2) * (gridSize + 2); i++) 
         {
-            aliveArrayPrefab[i] = 0xFF;
+            aliveArray[i] = 0xFF;
         }
     }
 }
@@ -70,9 +68,14 @@ public partial struct SetAliveArray : IJobEntity
     [ReadOnly] public int gridSize;
     public void Execute(in CellAliveComponent cell, in CellPositionComponent pos)
     {
+        int position = pos.position + gridSize + 1;
         if (cell.alive)
         {
-            aliveArray[pos.position + gridSize + 1] = 0x00;
+            aliveArray[position] = 0x00;
+        }
+        else
+        {
+            aliveArray[position] = 0xFF;
         }
     }
 }
