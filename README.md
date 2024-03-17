@@ -1,6 +1,7 @@
 # Game Of Life DOTS Challenge
 
 This project was part of a game jam challenge on Itch.io: https://itch.io/jam/dots-challenge-1 
+
 Video with explanation: https://youtu.be/LP15URd3Y3w
 
 Strategy: 
